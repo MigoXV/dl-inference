@@ -30,9 +30,9 @@ models       servicer  proto    utils
 
 CLI 参数、函数签名、README 示例和部署环境变量表按固定顺序组织：模型来源、runtime 推理参数、gRPC 服务参数、日志参数。模型来源放第一位且通常必填；runtime 参数包括 `--device`、`--dtype`、`--runner`、`--batch-size`、`--seed`、stream chunk 大小和最大输入长度；服务参数包括 `--host`、`--port`、`--workers`、`--max-message-mb`、timeout/keepalive；日志参数放最后。
 
-环境变量名称保持一致并按领域分组：`MODEL_PATH`；`RUNTIME_DEVICE`、`RUNTIME_DTYPE`、`RUNTIME_RUNNER`、`RUNTIME_BATCH_SIZE`、`RUNTIME_SEED`、`RUNTIME_MAX_INPUT_LENGTH`、`RUNTIME_CHUNK_SIZE`；`GRPC_HOST`、`GRPC_PORT`、`GRPC_WORKERS`、`GRPC_MAX_MESSAGE_MB`、`GRPC_TIMEOUT_MS`、`GRPC_KEEPALIVE_MS`、`GRPC_KEEPALIVE_TIMEOUT_MS`；`LOG_LEVEL`、`LOG_FORMAT`。避免裸 `DEVICE`、`DTYPE`、`RUNNER` 这类容易和部署环境冲突的名字。
+环境变量名称保持一致并按分组排列：`MODEL_PATH`；`DEVICE`、`DTYPE`、`RUNNER`、`BATCH_SIZE`、`SEED`、`MAX_INPUT_LENGTH`、`CHUNK_SIZE`；`GRPC_HOST`、`GRPC_PORT`、`GRPC_WORKERS`、`GRPC_MAX_MESSAGE_MB`、`GRPC_TIMEOUT_MS`、`GRPC_KEEPALIVE_MS`、`GRPC_KEEPALIVE_TIMEOUT_MS`；`LOG_LEVEL`、`LOG_FORMAT`。
 
-默认值只给部署上安全的参数：`MODEL_PATH` 不设默认值；runtime 默认保守，如 `RUNTIME_DEVICE=cpu`、`RUNTIME_DTYPE=fp32`、`RUNTIME_RUNNER=eager`、`RUNTIME_BATCH_SIZE=1`；gRPC 默认可用容器部署，如 `GRPC_HOST=0.0.0.0`、`GRPC_PORT=50051`、`GRPC_WORKERS=10`、`GRPC_MAX_MESSAGE_MB=100`；日志默认 `LOG_LEVEL=INFO`。不要默认猜测或下载模型，不要默认使用 CUDA 或加速 runner，不要对非法 dtype/device/runner 静默回退。
+默认值只给部署上安全的参数：`MODEL_PATH` 不设默认值；runtime 默认保守，如 `DEVICE=cpu`、`DTYPE=fp32`、`RUNNER=eager`、`BATCH_SIZE=1`；gRPC 默认可用容器部署，如 `GRPC_HOST=0.0.0.0`、`GRPC_PORT=50051`、`GRPC_WORKERS=10`、`GRPC_MAX_MESSAGE_MB=100`；日志默认 `LOG_LEVEL=INFO`。不要默认猜测或下载模型，不要默认使用 CUDA 或加速 runner，不要对非法 dtype/device/runner 静默回退。
 
 外部控制字符串必须在边界层解析：CLI/env 字符串放在 `commands` 或邻近 CLI utils；进入 inferencer/runtime 后只传 `torch.device`、`torch.dtype`、内部枚举、dataclass、NumPy array 或明确的领域对象。文本内容、资源路径和业务标签这类数据字符串可以保留，但 dtype/device/runner/log-level/单位值等控制字符串不要向底层传播。`dtype` 名称优先用 `fp32`、`bf16`、`fp16`、`int8`，构造模型前检查 device 与 dtype 兼容性。
 
